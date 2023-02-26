@@ -101,10 +101,13 @@ try:
         offsets = find_file_offsets(f, formats['PNG']['MAGIC'])
         print(f"found {len(offsets)} results")
         for found in offsets:
-            print(f"{found['type']}: {found['str']}")
+            filedata = formats[found['type']]['extract'](f, found['int'])
+            length = filedata == None and '0kb' or f"{round(len(filedata)/100)/10}kb"
+            print(f"{found['type']}: {found['str']}, {length} {filedata == None and '[invalid]' or ''}")
+            if filedata == None: continue
             with open(f"{dir_path}/{found['str']}.{str.lower(found['type'])}", 'wb') as w:
                 
-                w.write(formats[found['type']]['extract'](f, found['int']))
+                w.write(filedata)
 except BaseException as e:
     print(e)
 
