@@ -3,6 +3,7 @@ READ_CHUNK_SIZE = 2**10*8
 import sys
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
+os.chdir(dir_path)
 #import PIL
 
 filename = ''
@@ -10,7 +11,7 @@ filename = ''
 try:
     filename = sys.argv[1]
 except:
-    filename = dir_path + input("Enter file location: ")
+    filename = input("Enter file location: ")
 
 def extract_png_data(file, offset):
     # directly extracts file by image chunks
@@ -34,11 +35,12 @@ def extract_png_data(file, offset):
 def extract_jfif_data(file, offset):
     # the jfif format is currently incomprehensible for me, so just naively search for the ending marker
     file.seek(offset)
-    data = b""
+    file.read(6) # skip length and start markers
+    if file.read(5) != b"\x4A\x46\x49\x46\x00": return None # verify jfif identifier
 
     end_found = False
     last_chunk = b""
-    end_offset = offset
+    end_offset = offset + 11
     while not end_found:
         cur_chunk = file.read(READ_CHUNK_SIZE)
         found_local_offset = (last_chunk + cur_chunk).find(b"\xFF\xD9")
