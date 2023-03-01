@@ -12,7 +12,8 @@
 # Supported file types
  - [x] png  
  - [x] jpeg/jfif
- - [ ] bmp
+ - [x] bmp
+ - [ ] dds
  - [ ] ...
 
 # Planned Features

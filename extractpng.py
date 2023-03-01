@@ -56,6 +56,16 @@ def extract_jfif_data(file, offset):
     print(f"start: {hex(offset)}, len: {hex(file_len)}")
     return file.read(file_len)
 
+VALID_DIB_LENGTHS = [12, 64, 16, 40, 52, 56, 108, 124]
+def extract_bmp_data(file, offset):
+    file.seek(offset)
+    file.read(2) # skip 'BM' bytes
+    file_len = int.from_bytes(file.read(4), 'little')
+    file.read(8)
+    dib_len = int.from_bytes(file.read(4), 'little')
+    if dib_len not in VALID_DIB_LENGTHS: return None
+    file.seek(offset)
+    return file.read(file_len)
 
 formats = {
     'PNG': {
@@ -67,6 +77,11 @@ formats = {
         'type': 'JFIF',
         'MAGIC': b"\xFF\xD8\xFF\xE0",
         'extract': extract_jfif_data
+    },
+    'BMP': {
+        'type': 'BMP',
+        'MAGIC': b'\x42\x4D',
+        'extract': extract_bmp_data
     }
 }
 
