@@ -1,4 +1,5 @@
 READ_CHUNK_SIZE = 2**10*8
+SILENCE_INVALID_FILES = True
 
 import sys
 import os
@@ -86,7 +87,7 @@ formats = {
 }
 
 
-def find_file_offsets(file, sig):
+def find_file_offsets(file):
     found = []
     offset = 0
     last_chunk = b""
@@ -116,11 +117,11 @@ def find_file_offsets(file, sig):
 try:
     with open(filename, 'rb') as f:
         offsets = find_file_offsets(f, formats['PNG']['MAGIC'])
-        print(f"found {len(offsets)} results")
+        print(f"found {len(offsets)} results (some invalid files may be hidden)")
         for found in offsets:
             filedata = formats[found['type']]['extract'](f, found['int'])
             length = filedata == None and '0kb' or f"{round(len(filedata)/100)/10}kb"
-            print(f"{found['type']}: {found['str']}, {length} {filedata == None and '[invalid]' or ''}")
+            if filedata or not SILENCE_INVALID_FILES: print(f"{found['type']}: {found['str']}, {length} {not filedata and '[invalid]' or ''}")
             if filedata == None: continue
             with open(f"{dir_path}/{found['str']}.{str.lower(found['type'])}", 'wb') as w:
                 
